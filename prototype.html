@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic RAG — Onboarding Prototype</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ─── Prototype Shell ─── */
+    .proto-shell {
+      min-height: 100vh;
+      background: var(--off-white);
+      padding-top: 64px;
+    }
+
+    .proto-frame {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      min-height: 600px;
+      position: relative;
+    }
+
+    /* ─── Progress Bar ─── */
+    .proto-progress {
+      height: 4px;
+      background: var(--gray-100);
+      position: relative;
+    }
+
+    .proto-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--teal));
+      border-radius: 0 2px 2px 0;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Step Indicators ─── */
+    .proto-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.5rem 2rem 0;
+    }
+
+    .proto-step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-100);
+      transition: all 0.3s;
+    }
+
+    .proto-step-dot.active {
+      background: var(--purple);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    .proto-step-dot.done {
+      background: var(--teal);
+    }
+
+    /* ─── Screen Container ─── */
+    .proto-screen {
+      display: none;
+      padding: 2.5rem 3rem 3rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .proto-screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Screen 1: Industry Selection ─── */
+    .proto-title {
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--navy-deep);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .proto-subtitle {
+      text-align: center;
+      color: var(--gray-500);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .industry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .industry-card {
+      background: var(--white);
+      border: 2px solid var(--gray-100);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .industry-card:hover {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.03);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .industry-card.selected {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.06);
+      box-shadow: 0 0 0 3px rgba(129, 116, 242, 0.15);
+    }
+
+    .industry-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .industry-icon.assoc { background: linear-gradient(135deg, #e8e6ff, #f3f1ff); }
+    .industry-icon.legal { background: linear-gradient(135deg, #e0e5ff, #edf0ff); }
+    .industry-icon.retail { background: linear-gradient(135deg, #d4f5f2, #e8faf9); }
+    .industry-icon.finance { background: linear-gradient(135deg, #ede4ff, #f5f0ff); }
+
+    .industry-info h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+      margin-bottom: 0.25rem;
+    }
+
+    .industry-info p {
+      font-size: 0.82rem;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    /* ─── Screen 2: Use Case ─── */
+    .usecase-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .usecase-option {
+      background: var(--white);
+      border: 2px solid var(--gray-100);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .usecase-option:hover {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.03);
+    }
+
+    .usecase-option.selected {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.06);
+    }
+
+    .usecase-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      flex-shrink: 0;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .usecase-option.selected .usecase-radio {
+      border-color: var(--purple);
+    }
+
+    .usecase-option.selected .usecase-radio::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px; right: 3px; bottom: 3px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+
+    .usecase-text h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--navy-deep);
+      margin-bottom: 0.15rem;
+    }
+
+    .usecase-text p {
+      font-size: 0.82rem;
+      color: var(--gray-500);
+      line-height: 1.45;
+    }
+
+    .proto-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--gray-500);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .proto-back:hover { color: var(--navy-deep); }
+
+    /* ─── Screen 3: Upload ─── */
+    .upload-zone {
+      max-width: 520px;
+      margin: 0 auto;
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--off-white);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.03);
+    }
+
+    .upload-zone.has-file {
+      border-color: var(--teal);
+      border-style: solid;
+      background: rgba(0, 213, 199, 0.04);
+    }
+
+    .upload-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+
+    .upload-icon svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    .upload-zone h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+      margin-bottom: 0.3rem;
+    }
+
+    .upload-zone p {
+      font-size: 0.88rem;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    .upload-hint {
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .upload-format {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--gray-500);
+      background: var(--gray-100);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .upload-file-preview {
+      display: none;
+      max-width: 520px;
+      margin: 1rem auto 0;
+      background: var(--white);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .upload-file-preview.visible {
+      display: flex;
+    }
+
+    .file-icon-sm {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(129, 116, 242, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .file-meta {
+      flex: 1;
+    }
+
+    .file-meta .fname {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--navy-deep);
+    }
+
+    .file-meta .fsize {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+
+    .file-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-check svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+    }
+
+    .upload-auto-note {
+      max-width: 520px;
+      margin: 1.5rem auto 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 213, 199, 0.06);
+      border-radius: var(--radius);
+      border: 1px solid rgba(0, 213, 199, 0.15);
+    }
+
+    .upload-auto-note svg {
+      width: 18px;
+      height: 18px;
+      color: var(--teal);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .upload-auto-note p {
+      font-size: 0.82rem;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+
+    .upload-auto-note strong {
+      color: var(--navy-deep);
+    }
+
+    /* ─── Screen 4: Processing ─── */
+    .processing-container {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .processing-animation {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      position: relative;
+    }
+
+    .processing-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3px solid var(--gray-100);
+      border-top-color: var(--purple);
+      border-right-color: var(--teal);
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+    }
+
+    .processing-steps {
+      text-align: left;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .proc-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      color: var(--gray-300);
+      font-size: 0.9rem;
+      transition: all 0.4s;
+    }
+
+    .proc-step.active {
+      color: var(--navy-deep);
+      font-weight: 600;
+    }
+
+    .proc-step.done {
+      color: var(--teal-dark);
+    }
+
+    .proc-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .proc-step.active .proc-check {
+      border-color: var(--purple);
+      background: rgba(129, 116, 242, 0.1);
+    }
+
+    .proc-step.done .proc-check {
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .proc-step.done .proc-check svg {
+      display: block;
+    }
+
+    .proc-check svg {
+      width: 12px;
+      height: 12px;
+      color: white;
+      display: none;
+    }
+
+    /* ─── Screen 5: Ask Question ─── */
+    .ask-container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border: 2px solid var(--gray-100);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      gap: 0.75rem;
+      transition: border-color 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(129, 116, 242, 0.1);
+    }
+
+    .search-bar svg {
+      width: 20px;
+      height: 20px;
+      color: var(--gray-300);
+      flex-shrink: 0;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--navy-deep);
+      background: transparent;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--gray-300);
+    }
+
+    .search-bar button {
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .search-bar button:hover {
+      background: var(--navy);
+    }
+
+    .example-queries {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .example-q {
+      font-size: 0.75rem;
+      color: var(--purple);
+      background: rgba(129, 116, 242, 0.08);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(129, 116, 242, 0.15);
+    }
+
+    .example-q:hover {
+      background: rgba(129, 116, 242, 0.15);
+      border-color: var(--purple);
+    }
+
+    /* AI Response */
+    .ai-response {
+      display: none;
+      background: var(--off-white);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .ai-response.visible {
+      display: block;
+    }
+
+    .ai-response-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .ai-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-avatar svg {
+      width: 16px;
+      height: 16px;
+      color: white;
+    }
+
+    .ai-response-header span {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--navy-deep);
+    }
+
+    .ai-response-body {
+      font-size: 0.9rem;
+      color: var(--gray-700);
+      line-height: 1.75;
+    }
+
+    .ai-response-body p {
+      margin-bottom: 0.75rem;
+    }
+
+    .ai-citation {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--purple);
+      background: rgba(129, 116, 242, 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
+    .ai-sources {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .ai-sources-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .ai-source {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.8rem;
+      color: var(--gray-700);
+    }
+
+    .ai-source-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: rgba(129, 116, 242, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--purple);
+      flex-shrink: 0;
+    }
+
+    /* ─── Screen 6: Dashboard ─── */
+    .dashboard-container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .dashboard-success {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .success-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .dash-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .dash-stat {
+      background: var(--off-white);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .dash-stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+      letter-spacing: -0.02em;
+    }
+
+    .dash-stat-label {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      font-weight: 500;
+      margin-top: 0.15rem;
+    }
+
+    .dash-next-steps {
+      background: var(--off-white);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .dash-next-steps h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy-deep);
+      margin-bottom: 1rem;
+    }
+
+    .dash-action {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .dash-action:last-child {
+      border-bottom: none;
+    }
+
+    .dash-action:hover {
+      padding-left: 0.5rem;
+    }
+
+    .dash-action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .dash-action-icon.purple { background: rgba(129, 116, 242, 0.1); }
+    .dash-action-icon.teal { background: rgba(0, 213, 199, 0.1); }
+    .dash-action-icon.green { background: rgba(0, 211, 100, 0.1); }
+
+    .dash-action-text {
+      flex: 1;
+    }
+
+    .dash-action-text strong {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--navy-deep);
+    }
+
+    .dash-action-text span {
+      font-size: 0.78rem;
+      color: var(--gray-500);
+    }
+
+    .dash-action-arrow {
+      color: var(--gray-300);
+      font-size: 0.85rem;
+      transition: transform 0.2s;
+    }
+
+    .dash-action:hover .dash-action-arrow {
+      transform: translateX(3px);
+      color: var(--purple);
+    }
+
+    /* ─── Shared Button ─── */
+    .proto-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.75rem 2rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .proto-btn-primary {
+      background: var(--teal);
+      color: var(--navy-deep);
+    }
+
+    .proto-btn-primary:hover {
+      background: var(--teal-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 213, 199, 0.3);
+    }
+
+    .proto-btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .proto-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* ─── Prototype Label ─── */
+    .proto-label {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--navy-deep);
+      color: var(--light-text);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-pill);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .proto-label .dot-proto {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .proto-frame { margin: 1rem; border-radius: var(--radius); }
+      .proto-screen { padding: 1.5rem; }
+      .industry-grid { grid-template-columns: 1fr; }
+      .dash-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <rect width="24" height="24" rx="6" fill="url(#pg)"/>
+          <defs><linearGradient id="pg" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#8174f2"/><stop offset="1" stop-color="#00d5c7"/></linearGradient></defs>
+          <text x="6" y="17.5" font-family="Inter,sans-serif" font-weight="700" font-size="14" fill="#fff">P</text>
+        </svg>
+        Progress
+      </span>
+      <span class="separator"></span>
+      <span class="product-name">Agentic RAG</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Solutions</a></li>
+      <li><a href="prototype.html" style="color:#fff;">Prototype</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="proto-shell">
+  <div class="proto-frame">
+    <!-- Progress Bar -->
+    <div class="proto-progress">
+      <div class="proto-progress-fill" id="progressFill" style="width: 16.6%"></div>
+    </div>
+
+    <!-- Step Dots -->
+    <div class="proto-steps" id="stepDots">
+      <div class="proto-step-dot active" data-step="1"></div>
+      <div class="proto-step-dot" data-step="2"></div>
+      <div class="proto-step-dot" data-step="3"></div>
+      <div class="proto-step-dot" data-step="4"></div>
+      <div class="proto-step-dot" data-step="5"></div>
+      <div class="proto-step-dot" data-step="6"></div>
+    </div>
+
+    <!-- ═══ SCREEN 1: Industry Selection ═══ -->
+    <div class="proto-screen active" id="screen1">
+      <h2 class="proto-title">What type of organization are you?</h2>
+      <p class="proto-subtitle">We'll customize your experience based on your industry.</p>
+
+      <div class="industry-grid">
+        <div class="industry-card" data-industry="associations" onclick="selectIndustry(this)">
+          <div class="industry-icon assoc">&#127891;</div>
+          <div class="industry-info">
+            <h3>Professional Association</h3>
+            <p>Conferences, publications, member resources, policy documents</p>
+          </div>
+        </div>
+        <div class="industry-card" data-industry="legal" onclick="selectIndustry(this)">
+          <div class="industry-icon legal">&#9878;&#65039;</div>
+          <div class="industry-info">
+            <h3>Law Firm</h3>
+            <p>Case files, contracts, regulations, legal research, court opinions</p>
+          </div>
+        </div>
+        <div class="industry-card" data-industry="retail" onclick="selectIndustry(this)">
+          <div class="industry-icon retail">&#127978;</div>
+          <div class="industry-info">
+            <h3>Retail &amp; Franchise</h3>
+            <p>Operations manuals, training materials, compliance, safety protocols</p>
+          </div>
+        </div>
+        <div class="industry-card" data-industry="finance" onclick="selectIndustry(this)">
+          <div class="industry-icon finance">&#127974;</div>
+          <div class="industry-info">
+            <h3>Financial Services</h3>
+            <p>Regulatory filings, compliance docs, policy documents, audit records</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="proto-actions">
+        <button class="proto-btn proto-btn-primary" id="btn1" disabled onclick="goTo(2)">
+          Continue <span class="btn-arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 2: Use Case ═══ -->
+    <div class="proto-screen" id="screen2">
+      <div class="proto-back" onclick="goTo(1)">&larr; Back</div>
+      <h2 class="proto-title">What's your primary goal?</h2>
+      <p class="proto-subtitle" id="usecaseSubtitle">Select the use case that matters most to you right now.</p>
+
+      <div class="usecase-grid" id="usecaseGrid">
+        <!-- Populated dynamically -->
+      </div>
+
+      <div class="proto-actions">
+        <button class="proto-btn proto-btn-primary" id="btn2" disabled onclick="goTo(3)">
+          Continue <span class="btn-arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 3: Upload ═══ -->
+    <div class="proto-screen" id="screen3">
+      <div class="proto-back" onclick="goTo(2)">&larr; Back</div>
+      <h2 class="proto-title" id="uploadTitle">Upload your first document</h2>
+      <p class="proto-subtitle" id="uploadSubtitle">Drop a file below — we'll handle the rest.</p>
+
+      <div class="upload-zone" id="uploadZone" onclick="simulateUpload()">
+        <div class="upload-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12"/>
+          </svg>
+        </div>
+        <h3>Drag &amp; drop your file here</h3>
+        <p>or click to browse</p>
+        <div class="upload-hint">
+          <span class="upload-format">PDF</span>
+          <span class="upload-format">DOCX</span>
+          <span class="upload-format">PPTX</span>
+          <span class="upload-format">MP4</span>
+          <span class="upload-format">XLSX</span>
+          <span class="upload-format">HTML</span>
+          <span class="upload-format">+ 54 more</span>
+        </div>
+      </div>
+
+      <div class="upload-file-preview" id="filePreview">
+        <div class="file-icon-sm">&#128196;</div>
+        <div class="file-meta">
+          <div class="fname" id="fileName"></div>
+          <div class="fsize" id="fileSize"></div>
+        </div>
+        <div class="file-check">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="upload-auto-note">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p><strong>No configuration needed.</strong> We'll automatically set up your AI search assistant with optimal settings for your industry. LLM selection, document chunking, and retrieval strategy are all pre-configured.</p>
+      </div>
+
+      <div class="proto-actions">
+        <button class="proto-btn proto-btn-primary" id="btn3" disabled onclick="goTo(4)">
+          Process My Document <span class="btn-arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 4: Processing ═══ -->
+    <div class="proto-screen" id="screen4">
+      <h2 class="proto-title">Setting up your knowledge base...</h2>
+      <p class="proto-subtitle">This usually takes under a minute.</p>
+
+      <div class="processing-container">
+        <div class="processing-animation">
+          <div class="processing-ring"></div>
+          <div class="processing-center">&#9889;</div>
+        </div>
+
+        <div class="processing-steps" id="procSteps">
+          <div class="proc-step active" id="proc1">
+            <div class="proc-check">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <span>Extracting text and metadata...</span>
+          </div>
+          <div class="proc-step" id="proc2">
+            <div class="proc-check">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <span>Recognizing entities and key terms...</span>
+          </div>
+          <div class="proc-step" id="proc3">
+            <div class="proc-check">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <span>Building your searchable knowledge base...</span>
+          </div>
+          <div class="proc-step" id="proc4">
+            <div class="proc-check">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <span>Configuring AI assistant for your use case...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 5: Ask Question ═══ -->
+    <div class="proto-screen" id="screen5">
+      <div class="proto-back" onclick="goTo(3)">&larr; Upload another document</div>
+      <h2 class="proto-title">Your knowledge base is ready</h2>
+      <p class="proto-subtitle">Ask a question about your documents — just like you'd ask a colleague.</p>
+
+      <div class="ask-container">
+        <div class="search-bar">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="questionInput" placeholder="Ask a question about your documents..." onkeydown="if(event.key==='Enter')askQuestion()">
+          <button onclick="askQuestion()">Ask</button>
+        </div>
+
+        <div class="example-queries" id="exampleQueries">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="ai-response" id="aiResponse">
+          <div class="ai-response-header">
+            <div class="ai-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
+            <span>Agentic RAG</span>
+          </div>
+          <div class="ai-response-body" id="aiResponseBody">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="proto-actions" id="screen5Actions" style="display:none;">
+        <button class="proto-btn proto-btn-primary" onclick="goTo(6)">
+          Go to Dashboard <span class="btn-arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 6: Dashboard ═══ -->
+    <div class="proto-screen" id="screen6">
+      <div class="dashboard-container">
+        <div class="dashboard-success">
+          <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h2 class="proto-title">You're all set!</h2>
+          <p class="proto-subtitle">Your AI search assistant is live. Here's what happened behind the scenes.</p>
+        </div>
+
+        <div class="dash-stats">
+          <div class="dash-stat">
+            <div class="dash-stat-value" id="statPages">—</div>
+            <div class="dash-stat-label">Pages processed</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-value" id="statEntities">—</div>
+            <div class="dash-stat-label">Entities recognized</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-value" id="statTime">—</div>
+            <div class="dash-stat-label">Time to value</div>
+          </div>
+        </div>
+
+        <div class="dash-next-steps">
+          <h3>What's next?</h3>
+          <div class="dash-action">
+            <div class="dash-action-icon purple">&#128196;</div>
+            <div class="dash-action-text">
+              <strong>Upload more documents</strong>
+              <span>Add your full document library to expand your knowledge base</span>
+            </div>
+            <div class="dash-action-arrow">&rarr;</div>
+          </div>
+          <div class="dash-action">
+            <div class="dash-action-icon teal">&#128101;</div>
+            <div class="dash-action-text">
+              <strong>Invite your team</strong>
+              <span>Give your colleagues access to ask questions</span>
+            </div>
+            <div class="dash-action-arrow">&rarr;</div>
+          </div>
+          <div class="dash-action">
+            <div class="dash-action-icon green">&#128279;</div>
+            <div class="dash-action-text">
+              <strong>Embed search on your site</strong>
+              <span>Add an AI search widget to your intranet or member portal</span>
+            </div>
+            <div class="dash-action-arrow">&rarr;</div>
+          </div>
+        </div>
+
+        <div class="proto-actions" style="margin-top:2rem;">
+          <button class="proto-btn proto-btn-primary" onclick="goTo(1)">
+            Restart Prototype <span class="btn-arrow">&#8635;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /proto-frame -->
+</div><!-- /proto-shell -->
+
+<!-- Prototype Label -->
+<div class="proto-label">
+  <span class="dot-proto"></span>
+  PROTOTYPE — Non-Technical Onboarding Flow
+</div>
+
+<script>
+// ═══ Data per industry ═══
+const industryData = {
+  associations: {
+    name: 'Professional Association',
+    useCases: [
+      { id: 'search', title: 'Search conference content', desc: 'Find insights across years of keynotes, panels, and workshops' },
+      { id: 'hub', title: 'Member knowledge hub', desc: 'Give members instant answers from your entire publication library' },
+      { id: 'policy', title: 'Policy & regulation tracker', desc: 'Monitor regulatory changes and cross-reference with your resources' }
+    ],
+    uploadTitle: 'Upload a conference recording or publication',
+    uploadSub: 'Try a keynote video, research paper, or policy document.',
+    sampleFile: { name: '2025-Annual-Conference-Keynote.mp4', size: '124 MB' },
+    exampleQueries: [
+      'What were the top regulatory changes discussed at the 2025 annual conference?',
+      'Show me all content about cybersecurity from the past 2 years',
+      'What best practices were recommended for small firms?'
+    ],
+    aiResponse: `<p>Based on the 2025 Annual Conference keynote, the top regulatory changes discussed were:</p>
+      <p><strong>1. Updated Data Privacy Framework</strong> — The speaker emphasized the new cross-border data transfer requirements effective Q1 2026, noting that "member firms with fewer than 50 employees will need to comply within 18 months." <span class="ai-citation">&#128196; Keynote 34:12</span></p>
+      <p><strong>2. ESG Reporting Standards</strong> — New mandatory sustainability disclosures were highlighted, with specific guidance for small and mid-size firms. <span class="ai-citation">&#128196; Keynote 47:30</span></p>
+      <p><strong>3. AI Governance Guidelines</strong> — The industry's first self-regulatory framework for AI use was announced, developed in partnership with 12 member organizations. <span class="ai-citation">&#128196; Keynote 1:02:15</span></p>`,
+    sources: [
+      { id: '1', text: '2025 Annual Conference Keynote — at 34:12, 47:30, 1:02:15' },
+      { id: '2', text: 'Q3 2025 Policy Brief — Section 4: Regulatory Outlook' }
+    ],
+    stats: { pages: '247', entities: '1,834', time: '48 sec' }
+  },
+  legal: {
+    name: 'Law Firm',
+    useCases: [
+      { id: 'contracts', title: 'Contract analysis & review', desc: 'Search across all contracts for specific clauses, terms, and obligations' },
+      { id: 'research', title: 'Case law research', desc: 'Find relevant precedents and cross-reference with your case files' },
+      { id: 'compliance', title: 'Compliance monitoring', desc: 'Track regulatory changes and identify policy gaps automatically' }
+    ],
+    uploadTitle: 'Upload a contract or case file',
+    uploadSub: 'Try a contract, brief, or regulatory filing.',
+    sampleFile: { name: 'Master-Services-Agreement-TechCorp.pdf', size: '2.4 MB' },
+    exampleQueries: [
+      'What are the termination clauses in this agreement?',
+      'Find all force majeure provisions across our contracts',
+      'What are the liability caps and indemnification terms?'
+    ],
+    aiResponse: `<p>The Master Services Agreement with TechCorp contains the following termination clauses:</p>
+      <p><strong>1. Termination for Convenience</strong> (Section 8.2) — Either party may terminate with 90 days' written notice. Early termination fees apply per the schedule in Exhibit C. <span class="ai-citation">&#128196; Page 12, §8.2</span></p>
+      <p><strong>2. Termination for Cause</strong> (Section 8.3) — Material breach triggers a 30-day cure period. If uncured, the non-breaching party may terminate immediately. <span class="ai-citation">&#128196; Page 13, §8.3</span></p>
+      <p><strong>3. Termination for Insolvency</strong> (Section 8.5) — Automatic termination upon filing for bankruptcy or appointment of a receiver. <span class="ai-citation">&#128196; Page 14, §8.5</span></p>
+      <p>Note: The liability cap in Section 9.1 limits aggregate liability to 12 months of fees paid. <span class="ai-citation">&#128196; Page 15, §9.1</span></p>`,
+    sources: [
+      { id: '1', text: 'Master-Services-Agreement-TechCorp.pdf — Sections 8.2-8.5, 9.1' },
+      { id: '2', text: 'Exhibit C — Early Termination Fee Schedule' }
+    ],
+    stats: { pages: '42', entities: '312', time: '12 sec' }
+  },
+  retail: {
+    name: 'Retail & Franchise',
+    useCases: [
+      { id: 'ops', title: 'Operations manual search', desc: 'Give store teams instant answers from procedures and protocols' },
+      { id: 'training', title: 'Training & onboarding', desc: 'Help new employees find answers from day one without shadowing' },
+      { id: 'compliance', title: 'Safety & compliance', desc: 'Ensure every location follows the same up-to-date procedures' }
+    ],
+    uploadTitle: 'Upload your operations manual',
+    uploadSub: 'Try a store operations guide, safety protocol, or training document.',
+    sampleFile: { name: 'Store-Operations-Manual-2026.pdf', size: '8.7 MB' },
+    exampleQueries: [
+      'What is the protocol for a walk-in cooler failure after hours?',
+      'How do we handle a customer injury incident?',
+      'What are the opening and closing procedures for weekends?'
+    ],
+    aiResponse: `<p>Here is the protocol for a walk-in cooler failure after hours:</p>
+      <p><strong>1. Immediate Assessment</strong> — Check the temperature display. If above 41°F (5°C), begin emergency protocol. <span class="ai-citation">&#128196; Page 247, §12.3</span></p>
+      <p><strong>2. Transfer Perishables</strong> — Move all perishable items to the backup refrigeration unit in the prep area. Prioritize raw proteins and dairy. <span class="ai-citation">&#128196; Page 248, §12.3.1</span></p>
+      <p><strong>3. Contact Emergency Maintenance</strong> — Call Arctic Commercial Services at (555) 234-7890 (24/7 line). Reference account #FR-4421. <span class="ai-citation">&#128196; Page 249, Emergency Contacts</span></p>
+      <p><strong>4. Document & Report</strong> — Log the incident in the Daily Manager Report. Take photos of temperature readings. Notify your District Manager within 2 hours. <span class="ai-citation">&#128196; Page 250, §12.4</span></p>`,
+    sources: [
+      { id: '1', text: 'Store-Operations-Manual-2026.pdf — Chapter 12: Equipment Emergencies' },
+      { id: '2', text: 'Emergency Contact Directory — Updated March 2026' }
+    ],
+    stats: { pages: '412', entities: '2,156', time: '34 sec' }
+  },
+  finance: {
+    name: 'Financial Services',
+    useCases: [
+      { id: 'regulatory', title: 'Regulatory research', desc: 'Search regulations and cross-reference with internal policies instantly' },
+      { id: 'audit', title: 'Audit preparation', desc: 'Build audit-ready answers with traceable documentation' },
+      { id: 'gap', title: 'Policy gap analysis', desc: 'Automatically flag policies that don\'t meet new requirements' }
+    ],
+    uploadTitle: 'Upload a regulatory document',
+    uploadSub: 'Try a compliance filing, internal policy, or regulatory framework.',
+    sampleFile: { name: 'AML-Compliance-Framework-Q4-2025.pdf', size: '3.1 MB' },
+    exampleQueries: [
+      'Which internal policies reference the updated AML guidelines?',
+      'Show me all requirements for customer due diligence',
+      'What changed between the Q3 and Q4 regulatory frameworks?'
+    ],
+    aiResponse: `<p>I found <strong>23 internal policies</strong> that reference the AML (Anti-Money Laundering) guidelines. Here's the breakdown:</p>
+      <p><strong>Up to date (16 policies)</strong> — These correctly reference the Q4 2025 framework, including the updated Customer Due Diligence requirements in Section 5.2. <span class="ai-citation">&#128196; Framework §5.2</span></p>
+      <p><strong>Needs update (7 policies)</strong> — These still reference the Q2 2025 version. Key gaps:</p>
+      <p>&bull; <em>KYC-Policy-Corporate.pdf</em> — Missing enhanced due diligence for PEPs (Section 5.4.3) <span class="ai-citation">&#128196; §5.4.3</span></p>
+      <p>&bull; <em>Transaction-Monitoring-SOP.pdf</em> — Threshold amounts not updated ($5K &rarr; $3K per new guidelines) <span class="ai-citation">&#128196; §7.1</span></p>
+      <p>&bull; <em>SAR-Filing-Procedures.pdf</em> — Missing new 24-hour filing requirement for suspicious activity &gt;$10K <span class="ai-citation">&#128196; §8.2</span></p>`,
+    sources: [
+      { id: '1', text: 'AML-Compliance-Framework-Q4-2025.pdf — Sections 5.2, 5.4.3, 7.1, 8.2' },
+      { id: '2', text: 'Internal Policy Index — 23 policies cross-referenced' }
+    ],
+    stats: { pages: '186', entities: '947', time: '22 sec' }
+  }
+};
+
+// ═══ State ═══
+let currentScreen = 1;
+let selectedIndustry = null;
+let selectedUseCase = null;
+
+// ═══ Navigation ═══
+function goTo(screen) {
+  // Hide all screens
+  document.querySelectorAll('.proto-screen').forEach(s => s.classList.remove('active'));
+
+  // Show target
+  document.getElementById('screen' + screen).classList.add('active');
+
+  // Update progress
+  document.getElementById('progressFill').style.width = (screen / 6 * 100) + '%';
+
+  // Update dots
+  document.querySelectorAll('.proto-step-dot').forEach(dot => {
+    const step = parseInt(dot.dataset.step);
+    dot.classList.remove('active', 'done');
+    if (step === screen) dot.classList.add('active');
+    else if (step < screen) dot.classList.add('done');
+  });
+
+  currentScreen = screen;
+
+  // Auto-run processing animation
+  if (screen === 4) {
+    runProcessing();
+  }
+
+  // Reset question screen
+  if (screen === 5) {
+    document.getElementById('aiResponse').classList.remove('visible');
+    document.getElementById('screen5Actions').style.display = 'none';
+    document.getElementById('questionInput').value = '';
+  }
+
+  // Populate dashboard
+  if (screen === 6 && selectedIndustry) {
+    const data = industryData[selectedIndustry];
+    document.getElementById('statPages').textContent = data.stats.pages;
+    document.getElementById('statEntities').textContent = data.stats.entities;
+    document.getElementById('statTime').textContent = data.stats.time;
+  }
+
+  // Scroll to top of frame
+  document.querySelector('.proto-frame').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ═══ Screen 1: Industry Selection ═══
+function selectIndustry(card) {
+  document.querySelectorAll('.industry-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedIndustry = card.dataset.industry;
+  document.getElementById('btn1').disabled = false;
+
+  // Populate use cases
+  const data = industryData[selectedIndustry];
+  const grid = document.getElementById('usecaseGrid');
+  grid.innerHTML = data.useCases.map(uc => `
+    <div class="usecase-option" onclick="selectUseCase(this, '${uc.id}')">
+      <div class="usecase-radio"></div>
+      <div class="usecase-text">
+        <h4>${uc.title}</h4>
+        <p>${uc.desc}</p>
+      </div>
+    </div>
+  `).join('');
+
+  // Update upload screen
+  document.getElementById('uploadTitle').textContent = data.uploadTitle;
+  document.getElementById('uploadSubtitle').textContent = data.uploadSub;
+
+  // Populate example queries
+  const queries = document.getElementById('exampleQueries');
+  queries.innerHTML = data.exampleQueries.map(q =>
+    `<span class="example-q" onclick="useExample(this)">${q}</span>`
+  ).join('');
+}
+
+// ═══ Screen 2: Use Case ═══
+function selectUseCase(el, id) {
+  document.querySelectorAll('.usecase-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedUseCase = id;
+  document.getElementById('btn2').disabled = false;
+}
+
+// ═══ Screen 3: Upload ═══
+function simulateUpload() {
+  if (!selectedIndustry) return;
+  const data = industryData[selectedIndustry];
+  const zone = document.getElementById('uploadZone');
+  const preview = document.getElementById('filePreview');
+
+  zone.classList.add('has-file');
+  preview.classList.add('visible');
+  document.getElementById('fileName').textContent = data.sampleFile.name;
+  document.getElementById('fileSize').textContent = data.sampleFile.size;
+  document.getElementById('btn3').disabled = false;
+}
+
+// ═══ Screen 4: Processing Animation ═══
+function runProcessing() {
+  const steps = ['proc1', 'proc2', 'proc3', 'proc4'];
+  let i = 0;
+
+  // Reset
+  steps.forEach(s => {
+    document.getElementById(s).classList.remove('active', 'done');
+  });
+  document.getElementById(steps[0]).classList.add('active');
+
+  const interval = setInterval(() => {
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.remove('active');
+      document.getElementById(steps[i]).classList.add('done');
+      i++;
+      if (i < steps.length) {
+        document.getElementById(steps[i]).classList.add('active');
+      }
+    } else {
+      clearInterval(interval);
+      setTimeout(() => goTo(5), 600);
+    }
+  }, 1200);
+}
+
+// ═══ Screen 5: Ask Question ═══
+function useExample(el) {
+  document.getElementById('questionInput').value = el.textContent;
+  askQuestion();
+}
+
+function askQuestion() {
+  const input = document.getElementById('questionInput').value.trim();
+  if (!input || !selectedIndustry) return;
+
+  const data = industryData[selectedIndustry];
+  const responseEl = document.getElementById('aiResponse');
+  const body = document.getElementById('aiResponseBody');
+
+  // Build sources HTML
+  const sourcesHtml = data.sources.map(s =>
+    `<div class="ai-source"><div class="ai-source-badge">${s.id}</div>${s.text}</div>`
+  ).join('');
+
+  body.innerHTML = data.aiResponse +
+    `<div class="ai-sources"><div class="ai-sources-label">Sources</div>${sourcesHtml}</div>`;
+
+  responseEl.classList.add('visible');
+  document.getElementById('screen5Actions').style.display = 'flex';
+
+  // Scroll to response
+  responseEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+</body>
+</html>
