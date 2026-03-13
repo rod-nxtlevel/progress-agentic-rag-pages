@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic RAG — App Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       RESET & VARIABLES
+       ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #1a1d2e;
+      --sidebar-hover: #252840;
+      --sidebar-active: #2d3152;
+      --sidebar-text: rgba(255,255,255,0.55);
+      --sidebar-text-active: #fff;
+      --sidebar-width: 220px;
+      --topbar-height: 52px;
+
+      --purple: #8174f2;
+      --purple-light: #a599ff;
+      --purple-bg: rgba(129,116,242,0.08);
+      --purple-border: rgba(129,116,242,0.2);
+      --teal: #00d5c7;
+      --teal-dark: #00b3a6;
+      --green: #00d364;
+      --red: #ef4444;
+
+      --bg: #f4f5f9;
+      --white: #ffffff;
+      --text: #1a1d3a;
+      --text-secondary: #6b7094;
+      --text-tertiary: #9ca0b8;
+      --border: #e5e7ef;
+      --border-light: #f0f1f6;
+
+      --radius: 10px;
+      --radius-sm: 6px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html { font-size: 15px; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font); cursor: pointer; border: none; }
+    input, textarea { font-family: var(--font); }
+
+    /* ═══════════════════════════════════════════
+       WELCOME SCREEN (Persona Selection)
+       ═══════════════════════════════════════════ */
+    .welcome-screen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1d2e 0%, #252952 50%, #1a1d2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .welcome-screen.hidden { display: none; }
+
+    .welcome-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: welcomeFade 0.6s ease;
+    }
+
+    @keyframes welcomeFade {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .welcome-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .welcome-logo svg { flex-shrink: 0; }
+
+    .welcome-logo-text {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .welcome-logo-text span {
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
+    .welcome-card h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-card > p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .persona-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .persona-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .persona-card:hover {
+      border-color: var(--purple);
+      background: var(--purple-bg);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .persona-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .persona-icon.assoc { background: linear-gradient(135deg, #ede8ff, #f5f2ff); }
+    .persona-icon.legal { background: linear-gradient(135deg, #e0e8ff, #edf2ff); }
+    .persona-icon.retail { background: linear-gradient(135deg, #d4f5f2, #e8faf9); }
+    .persona-icon.finance { background: linear-gradient(135deg, #fff3d6, #fff9ec); }
+
+    .persona-card h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .persona-card p {
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* ═══════════════════════════════════════════
+       ONBOARDING OVERLAY
+       ═══════════════════════════════════════════ */
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,29,46,0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+      animation: overlayIn 0.3s ease;
+    }
+
+    .onboarding-overlay.hidden { display: none; }
+
+    @keyframes overlayIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .onboarding-modal {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+      overflow: hidden;
+      animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .onboarding-progress {
+      height: 3px;
+      background: var(--border-light);
+    }
+
+    .onboarding-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--teal));
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .onboarding-body {
+      padding: 2rem 2rem 1.75rem;
+    }
+
+    .onboarding-step-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--purple);
+      margin-bottom: 0.75rem;
+    }
+
+    .onboarding-body h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .onboarding-body > p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .onboarding-step { display: none; }
+    .onboarding-step.active { display: block; }
+
+    /* Use case options */
+    .uc-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .uc-option:hover { border-color: var(--purple-border); background: var(--purple-bg); }
+    .uc-option.selected { border-color: var(--purple); background: var(--purple-bg); }
+
+    .uc-radio {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+      transition: all 0.15s;
+    }
+
+    .uc-option.selected .uc-radio {
+      border-color: var(--purple);
+    }
+
+    .uc-option.selected .uc-radio::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--purple);
+    }
+
+    .uc-text h4 { font-size: 0.85rem; font-weight: 600; }
+    .uc-text p { font-size: 0.73rem; color: var(--text-secondary); margin-top: 2px; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-zone:hover { border-color: var(--purple); background: var(--purple-bg); }
+
+    .upload-zone-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-zone h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .upload-zone p { font-size: 0.75rem; color: var(--text-secondary); }
+
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      margin-top: 0.75rem;
+    }
+
+    .file-preview.visible { display: flex; }
+    .file-preview-icon { font-size: 1.5rem; }
+    .file-preview-info { flex: 1; }
+    .file-preview-info .fname { font-size: 0.8rem; font-weight: 600; }
+    .file-preview-info .fsize { font-size: 0.7rem; color: var(--text-secondary); }
+
+    .file-preview-check {
+      width: 22px; height: 22px;
+      background: var(--teal);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Processing */
+    .processing-wrap { text-align: center; padding: 1rem 0; }
+
+    .proc-spinner {
+      width: 64px; height: 64px;
+      border: 3px solid var(--border-light);
+      border-top-color: var(--purple);
+      border-right-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .proc-steps { text-align: left; max-width: 280px; margin: 0 auto; }
+
+    .proc-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 0;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      transition: all 0.3s;
+    }
+
+    .proc-item.active { color: var(--text); font-weight: 600; }
+    .proc-item.done { color: var(--teal-dark); }
+
+    .proc-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .proc-item.active .proc-dot { border-color: var(--purple); background: var(--purple-bg); }
+    .proc-item.done .proc-dot { border-color: var(--teal); background: var(--teal); }
+    .proc-item.done .proc-dot svg { display: block; }
+    .proc-dot svg { width: 8px; height: 8px; color: white; display: none; }
+
+    /* Onboarding footer */
+    .onboarding-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem 2rem 1.5rem;
+    }
+
+    .btn-ob {
+      padding: 0.55rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn-ob-primary {
+      background: var(--purple);
+      color: white;
+    }
+
+    .btn-ob-primary:hover { background: #7164e0; }
+    .btn-ob-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-ob-secondary {
+      background: var(--bg);
+      color: var(--text-secondary);
+    }
+
+    /* ═══════════════════════════════════════════
+       APP SHELL
+       ═══════════════════════════════════════════ */
+    .app-shell {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .app-shell.active { display: flex; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      min-height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-logo {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-logo svg { flex-shrink: 0; }
+
+    .sidebar-logo-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-nav { padding: 0.75rem 0.6rem; flex: 1; }
+
+    .sidebar-section-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.25);
+      padding: 1rem 0.65rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--sidebar-text);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: var(--sidebar-hover); color: var(--sidebar-text-active); }
+    .nav-item.active { background: var(--sidebar-active); color: var(--sidebar-text-active); }
+
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.6; }
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-badge {
+      margin-left: auto;
+      font-size: 0.6rem;
+      font-weight: 700;
+      background: var(--purple);
+      color: white;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .sidebar-trial {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .trial-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-bottom: 0.4rem;
+    }
+
+    .trial-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+      border-radius: 2px;
+      width: 100%;
+    }
+
+    .trial-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .trial-text strong { color: var(--teal); }
+
+    /* Main content area */
+    .main-wrap {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar */
+    .topbar {
+      height: var(--topbar-height);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .topbar-left strong { color: var(--text); font-weight: 600; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .topbar-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .topbar-btn:hover { background: var(--border); }
+    .topbar-btn svg { width: 16px; height: 16px; }
+
+    .topbar-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Content */
+    .content { padding: 1.5rem; flex: 1; }
+
+    /* ═══════════════════════════════════════════
+       DASHBOARD VIEW
+       ═══════════════════════════════════════════ */
+    .view { display: none; animation: viewIn 0.3s ease; }
+    .view.active { display: block; }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dash-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .dash-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .dash-header p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .metric-value.purple { color: var(--purple); }
+    .metric-value.teal { color: var(--teal-dark); }
+    .metric-value.green { color: var(--green); }
+
+    .metric-sub {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      margin-top: 0.35rem;
+    }
+
+    /* Quick actions */
+    .quick-action {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quick-action h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .quick-search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.9rem;
+      gap: 0.6rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-search-bar:hover { border-color: var(--purple); }
+
+    .quick-search-bar svg { width: 18px; height: 18px; color: var(--text-tertiary); flex-shrink: 0; }
+
+    .quick-search-bar span {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    /* Recent docs */
+    .recent-docs {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .recent-docs h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .doc-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .doc-row:last-child { border-bottom: none; }
+
+    .doc-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .doc-info { flex: 1; }
+    .doc-info .doc-name { font-size: 0.8rem; font-weight: 600; }
+    .doc-info .doc-meta { font-size: 0.68rem; color: var(--text-tertiary); }
+    .doc-status { font-size: 0.65rem; font-weight: 600; color: var(--teal-dark); }
+
+    /* ═══════════════════════════════════════════
+       SEARCH/ASK VIEW
+       ═══════════════════════════════════════════ */
+    .search-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .search-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .search-header p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .search-input-wrap {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.7rem 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .search-input-wrap:focus-within {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(129,116,242,0.1);
+    }
+
+    .search-input-wrap svg { width: 20px; height: 20px; color: var(--text-tertiary); flex-shrink: 0; }
+
+    .search-input-wrap input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .search-input-wrap input::placeholder { color: var(--text-tertiary); }
+
+    .search-send {
+      background: var(--purple);
+      color: white;
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .search-send:hover { background: #7164e0; }
+
+    .example-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .example-pill {
+      font-size: 0.7rem;
+      color: var(--purple);
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-border);
+      padding: 0.3rem 0.65rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .example-pill:hover { background: rgba(129,116,242,0.15); }
+
+    /* AI Answer */
+    .ai-answer {
+      display: none;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: viewIn 0.4s ease;
+    }
+
+    .ai-answer.visible { display: block; }
+
+    .ai-answer-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1.25rem;
+      background: linear-gradient(90deg, rgba(129,116,242,0.06), rgba(0,213,199,0.04));
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .ai-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--purple);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .ai-answer-header span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ai-answer-body {
+      padding: 1.25rem;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .ai-answer-body p { margin-bottom: 0.75rem; }
+    .ai-answer-body p:last-child { margin-bottom: 0; }
+    .ai-answer-body strong { font-weight: 700; }
+
+    .ai-cite {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+      background: rgba(0,213,199,0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 3px;
+    }
+
+    .ai-sources {
+      border-top: 1px solid var(--border-light);
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+    }
+
+    .ai-sources-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+
+    .ai-source-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .ai-source-num {
+      width: 18px; height: 18px;
+      border-radius: 4px;
+      background: var(--teal);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Follow up */
+    .follow-up {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .follow-up.visible { display: block; }
+
+    .follow-up-bar {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.9rem;
+      gap: 0.5rem;
+    }
+
+    .follow-up-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: transparent;
+    }
+
+    /* ═══════════════════════════════════════════
+       DOCUMENTS VIEW
+       ═══════════════════════════════════════════ */
+    .docs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .docs-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-upload {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--purple);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .btn-upload:hover { background: #7164e0; }
+    .btn-upload svg { width: 16px; height: 16px; }
+
+    .docs-table {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .docs-table-header {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px 80px;
+      padding: 0.6rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+
+    .docs-table-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px 80px;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-light);
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .docs-table-row:last-child { border-bottom: none; }
+
+    .doc-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .doc-name-cell .doc-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+
+    .doc-status-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    .doc-status-badge.ready { background: rgba(0,211,100,0.1); color: var(--green); }
+
+    /* ═══════════════════════════════════════════
+       MOBILE RESPONSIVE
+       ═══════════════════════════════════════════ */
+    .mobile-menu-btn {
+      display: none;
+      width: 36px; height: 36px;
+      background: none;
+      color: var(--text);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-menu-btn svg { width: 20px; height: 20px; }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+
+      .sidebar {
+        transform: translateX(-260px);
+        width: 260px;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+
+      .main-wrap { margin-left: 0; }
+
+      .mobile-menu-btn { display: flex; }
+
+      .persona-grid { grid-template-columns: 1fr; }
+
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .docs-table-header,
+      .docs-table-row { grid-template-columns: 1fr 80px; }
+
+      .docs-table-header > :nth-child(n+3),
+      .docs-table-row > :nth-child(n+3) { display: none; }
+
+      .welcome-card { padding: 2rem 1.5rem; }
+
+      .onboarding-body { padding: 1.5rem; }
+      .onboarding-footer { padding: 0.75rem 1.5rem 1.25rem; }
+    }
+
+    /* ═══════════════════════════════════════════
+       PROTOTYPE BADGE
+       ═══════════════════════════════════════════ */
+    .proto-badge {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--sidebar-bg);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .proto-badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 2s ease infinite;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     WELCOME SCREEN
+     ═══════════════════════════════════════════ -->
+<div class="welcome-screen" id="welcomeScreen">
+  <div class="welcome-card">
+    <div class="welcome-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="url(#wg)"/>
+        <defs><linearGradient id="wg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#8174f2"/><stop offset="1" stop-color="#00d5c7"/></linearGradient></defs>
+        <text x="8" y="23" font-family="Inter,sans-serif" font-weight="700" font-size="18" fill="#fff">P</text>
+      </svg>
+      <div class="welcome-logo-text">Agentic RAG <span>by Progress</span></div>
+    </div>
+    <h1>What kind of organization are you?</h1>
+    <p>We'll set up your knowledge hub with the right defaults for your industry &mdash; no configuration needed.</p>
+    <div class="persona-grid">
+      <div class="persona-card" onclick="selectPersona('associations')">
+        <div class="persona-icon assoc">&#127891;</div>
+        <h3>Professional Association</h3>
+        <p>Conferences, publications, member resources &amp; policy documents</p>
+      </div>
+      <div class="persona-card" onclick="selectPersona('legal')">
+        <div class="persona-icon legal">&#9878;&#65039;</div>
+        <h3>Law Firm &amp; Legal Ops</h3>
+        <p>Contracts, case files, regulations &amp; compliance documents</p>
+      </div>
+      <div class="persona-card" onclick="selectPersona('retail')">
+        <div class="persona-icon retail">&#127978;</div>
+        <h3>Retail &amp; Franchise</h3>
+        <p>Operations manuals, training guides &amp; safety protocols</p>
+      </div>
+      <div class="persona-card" onclick="selectPersona('finance')">
+        <div class="persona-icon finance">&#127974;</div>
+        <h3>Financial Services</h3>
+        <p>Regulatory filings, compliance policies &amp; audit documentation</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ONBOARDING OVERLAY
+     ═══════════════════════════════════════════ -->
+<div class="onboarding-overlay hidden" id="onboardingOverlay">
+  <div class="onboarding-modal">
+    <div class="onboarding-progress">
+      <div class="onboarding-progress-fill" id="obProgressFill" style="width: 33%"></div>
+    </div>
+
+    <!-- Step 1: Use Case -->
+    <div class="onboarding-step active" id="obStep1">
+      <div class="onboarding-body">
+        <div class="onboarding-step-label">Step 1 of 3</div>
+        <h2 id="obTitle1">What will you use this for?</h2>
+        <p>Pick your primary use case &mdash; you can always add more later.</p>
+        <div id="obUseCases"></div>
+      </div>
+      <div class="onboarding-footer">
+        <button class="btn-ob btn-ob-primary" id="obBtn1" disabled onclick="obNext(2)">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Upload -->
+    <div class="onboarding-step" id="obStep2">
+      <div class="onboarding-body">
+        <div class="onboarding-step-label">Step 2 of 3</div>
+        <h2 id="obUploadTitle">Upload your first document</h2>
+        <p id="obUploadSub">We'll index it and make it searchable in seconds.</p>
+        <div class="upload-zone" onclick="simulateUpload()">
+          <div class="upload-zone-icon">&#128196;</div>
+          <h4>Drop a file here or click to browse</h4>
+          <p>PDF, DOCX, MP4, MP3, PPTX &mdash; 60+ formats supported</p>
+        </div>
+        <div class="file-preview" id="obFilePreview">
+          <div class="file-preview-icon">&#128196;</div>
+          <div class="file-preview-info">
+            <div class="fname" id="obFileName"></div>
+            <div class="fsize" id="obFileSize"></div>
+          </div>
+          <div class="file-preview-check">
+            <svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="onboarding-footer">
+        <button class="btn-ob btn-ob-secondary" onclick="obNext(1)">Back</button>
+        <button class="btn-ob btn-ob-primary" id="obBtn2" disabled onclick="obNext(3)">Process Document</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Processing -->
+    <div class="onboarding-step" id="obStep3">
+      <div class="onboarding-body">
+        <div class="onboarding-step-label">Step 3 of 3</div>
+        <h2>Setting up your knowledge hub</h2>
+        <p>This usually takes about 30 seconds.</p>
+        <div class="processing-wrap">
+          <div class="proc-spinner"></div>
+          <div class="proc-steps">
+            <div class="proc-item active" id="p1"><div class="proc-dot"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></div>Extracting text &amp; structure</div>
+            <div class="proc-item" id="p2"><div class="proc-dot"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></div>Generating knowledge index</div>
+            <div class="proc-item" id="p3"><div class="proc-dot"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></div>Configuring AI for your industry</div>
+            <div class="proc-item" id="p4"><div class="proc-dot"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></div>Ready to search</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP SHELL
+     ═══════════════════════════════════════════ -->
+<div class="app-shell" id="appShell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="url(#sg)"/>
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#8174f2"/><stop offset="1" stop-color="#00d5c7"/></linearGradient></defs>
+        <text x="8" y="23" font-family="Inter,sans-serif" font-weight="700" font-size="18" fill="#fff">P</text>
+      </svg>
+      <div class="sidebar-logo-text">Agentic RAG</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showView('dashboard')" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Home
+      </div>
+      <div class="sidebar-section-label">Knowledge</div>
+      <div class="nav-item" onclick="showView('documents')" data-view="documents">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Documents
+      </div>
+      <div class="nav-item" onclick="showView('search')" data-view="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Ask Questions
+        <span class="sidebar-badge">AI</span>
+      </div>
+      <div class="sidebar-section-label">Connect</div>
+      <div class="nav-item" onclick="showView('dashboard')" data-view="integrations">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Integrations
+      </div>
+    </nav>
+    <div class="sidebar-trial">
+      <div class="trial-bar"><div class="trial-fill"></div></div>
+      <div class="trial-text"><strong>Free Trial</strong> &middot; 15 days left</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-wrap">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span id="topbarLabel"><strong>Knowledge Hub</strong> &middot; <span id="topbarPersona"></span></span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="topbar-avatar" id="topbarAvatar">FT</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Dashboard View -->
+      <div class="view active" id="viewDashboard">
+        <div class="dash-header">
+          <h1 id="dashTitle">Your Knowledge Hub</h1>
+          <p id="dashSub">Everything indexed, searchable, and ready to answer questions.</p>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Documents</div>
+            <div class="metric-value purple" id="mDocs">1</div>
+            <div class="metric-sub">indexed &amp; searchable</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Pages Processed</div>
+            <div class="metric-value teal" id="mPages">0</div>
+            <div class="metric-sub">across all documents</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Questions Answered</div>
+            <div class="metric-value green" id="mQuestions">0</div>
+            <div class="metric-sub">with source citations</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Avg. Response</div>
+            <div class="metric-value" id="mTime">&lt;3s</div>
+            <div class="metric-sub">with full traceability</div>
+          </div>
+        </div>
+        <div class="quick-action">
+          <h3>&#9889; Ask a question about your documents</h3>
+          <div class="quick-search-bar" onclick="showView('search')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span id="dashQuickPrompt">Try: "What were the key findings?"</span>
+          </div>
+        </div>
+        <div class="recent-docs">
+          <h3>Recent Documents</h3>
+          <div id="dashDocList"></div>
+        </div>
+      </div>
+
+      <!-- Documents View -->
+      <div class="view" id="viewDocuments">
+        <div class="docs-header">
+          <h1>My Documents</h1>
+          <button class="btn-upload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
+          </button>
+        </div>
+        <div class="docs-table">
+          <div class="docs-table-header">
+            <div>Name</div>
+            <div>Type</div>
+            <div>Size</div>
+            <div>Status</div>
+          </div>
+          <div id="docsTableBody"></div>
+        </div>
+      </div>
+
+      <!-- Search View -->
+      <div class="view" id="viewSearch">
+        <div class="search-header">
+          <h1>Ask Questions</h1>
+          <p id="searchSub">Get instant answers from your documents &mdash; with source citations you can trust.</p>
+        </div>
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Ask anything about your documents..." onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="search-send" onclick="doSearch()">Ask</button>
+        </div>
+        <div class="example-pills" id="searchPills"></div>
+        <div class="ai-answer" id="aiAnswer">
+          <div class="ai-answer-header">
+            <div class="ai-dot"></div>
+            <span>AI-Generated Answer</span>
+          </div>
+          <div class="ai-answer-body" id="aiAnswerBody"></div>
+          <div class="ai-sources" id="aiSources"></div>
+        </div>
+        <div class="follow-up" id="followUp">
+          <div class="follow-up-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--text-tertiary);flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <input type="text" placeholder="Ask a follow-up question..." onkeydown="if(event.key==='Enter')doSearch()">
+            <button class="search-send" onclick="doSearch()">Ask</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Prototype Badge -->
+<div class="proto-badge">
+  <div class="proto-badge-dot"></div>
+  Prototype &mdash; Non-Technical Onboarding
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// PERSONA DATA
+// ═══════════════════════════════════════════
+const personas = {
+  associations: {
+    name: 'Professional Association',
+    short: 'Association',
+    useCases: [
+      { id: 'search', title: 'Search conference content', desc: 'Find insights across years of keynotes, panels, and workshops' },
+      { id: 'hub', title: 'Member knowledge hub', desc: 'Give members instant answers from your publication library' },
+      { id: 'policy', title: 'Policy & regulation tracker', desc: 'Monitor regulatory changes across your resource archive' }
+    ],
+    sampleFiles: [
+      { name: '2025-Annual-Conference-Keynote.mp4', size: '124 MB', type: 'Video', icon: '&#127909;' },
+      { name: 'Q4-2025-Policy-Brief.pdf', size: '2.1 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'Member-Resource-Guide-2026.pdf', size: '4.8 MB', type: 'PDF', icon: '&#128196;' }
+    ],
+    quickPrompt: 'Try: "What regulatory changes were discussed at the annual conference?"',
+    queries: [
+      'What were the top regulatory changes discussed at the 2025 conference?',
+      'Show me all cybersecurity content from the past 2 years',
+      'What best practices were recommended for small firms?'
+    ],
+    answer: `<p>Based on the 2025 Annual Conference keynote, the top regulatory changes discussed were:</p>
+      <p><strong>1. Updated Data Privacy Framework</strong> — The speaker emphasized new cross-border data transfer requirements effective Q1 2026, noting that "member firms with fewer than 50 employees will need to comply within 18 months." <span class="ai-cite">&#128196; Keynote 34:12</span></p>
+      <p><strong>2. ESG Reporting Standards</strong> — New mandatory sustainability disclosures were highlighted, with specific guidance for small and mid-size firms. <span class="ai-cite">&#128196; Keynote 47:30</span></p>
+      <p><strong>3. AI Governance Guidelines</strong> — The industry's first self-regulatory framework for AI use was announced, developed with 12 member organizations. <span class="ai-cite">&#128196; Keynote 1:02:15</span></p>`,
+    sources: [
+      { num: '1', text: '2025 Annual Conference Keynote — at 34:12, 47:30, 1:02:15' },
+      { num: '2', text: 'Q4 2025 Policy Brief — Section 4: Regulatory Outlook' }
+    ],
+    stats: { pages: '247', questions: '0', time: '<3s' }
+  },
+  legal: {
+    name: 'Law Firm',
+    short: 'Legal',
+    useCases: [
+      { id: 'contracts', title: 'Contract analysis & review', desc: 'Search across contracts for clauses, terms, and obligations' },
+      { id: 'research', title: 'Case law research', desc: 'Find relevant precedents and cross-reference case files' },
+      { id: 'compliance', title: 'Compliance monitoring', desc: 'Track regulatory changes and identify policy gaps' }
+    ],
+    sampleFiles: [
+      { name: 'Master-Services-Agreement-TechCorp.pdf', size: '2.4 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'Employment-Contract-Template.docx', size: '890 KB', type: 'Word', icon: '&#128196;' },
+      { name: 'NDA-2026-Standard.pdf', size: '340 KB', type: 'PDF', icon: '&#128196;' }
+    ],
+    quickPrompt: 'Try: "What are the termination clauses in this agreement?"',
+    queries: [
+      'What are the termination clauses in this agreement?',
+      'Find all force majeure provisions across our contracts',
+      'What are the liability caps and indemnification terms?'
+    ],
+    answer: `<p>The Master Services Agreement with TechCorp contains the following termination clauses:</p>
+      <p><strong>1. Termination for Convenience</strong> (Section 8.2) — Either party may terminate with 90 days' written notice. Early termination fees apply per Exhibit C. <span class="ai-cite">&#128196; Page 12, &sect;8.2</span></p>
+      <p><strong>2. Termination for Cause</strong> (Section 8.3) — Material breach triggers a 30-day cure period. If uncured, the non-breaching party may terminate immediately. <span class="ai-cite">&#128196; Page 13, &sect;8.3</span></p>
+      <p><strong>3. Termination for Insolvency</strong> (Section 8.5) — Automatic termination upon filing for bankruptcy or appointment of a receiver. <span class="ai-cite">&#128196; Page 14, &sect;8.5</span></p>
+      <p>Note: The liability cap in Section 9.1 limits aggregate liability to 12 months of fees paid. <span class="ai-cite">&#128196; Page 15, &sect;9.1</span></p>`,
+    sources: [
+      { num: '1', text: 'Master-Services-Agreement-TechCorp.pdf — Sections 8.2-8.5, 9.1' },
+      { num: '2', text: 'Exhibit C — Early Termination Fee Schedule' }
+    ],
+    stats: { pages: '42', questions: '0', time: '<2s' }
+  },
+  retail: {
+    name: 'Retail & Franchise',
+    short: 'Retail',
+    useCases: [
+      { id: 'ops', title: 'Operations manual search', desc: 'Give store teams instant answers from procedures and protocols' },
+      { id: 'training', title: 'Training & onboarding', desc: 'Help new employees find answers from day one' },
+      { id: 'safety', title: 'Safety & compliance', desc: 'Ensure every location follows up-to-date procedures' }
+    ],
+    sampleFiles: [
+      { name: 'Store-Operations-Manual-2026.pdf', size: '8.7 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'Food-Safety-Protocols.pdf', size: '3.2 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'New-Employee-Training-Guide.pdf', size: '5.4 MB', type: 'PDF', icon: '&#128196;' }
+    ],
+    quickPrompt: 'Try: "What is the protocol for a cooler failure after hours?"',
+    queries: [
+      'What is the protocol for a walk-in cooler failure after hours?',
+      'How do we handle a customer injury incident?',
+      'What are the opening and closing procedures for weekends?'
+    ],
+    answer: `<p>Here is the protocol for a walk-in cooler failure after hours:</p>
+      <p><strong>1. Immediate Assessment</strong> — Check the temperature display. If above 41&deg;F (5&deg;C), begin emergency protocol. <span class="ai-cite">&#128196; Page 247, &sect;12.3</span></p>
+      <p><strong>2. Transfer Perishables</strong> — Move all perishable items to the backup refrigeration unit. Prioritize raw proteins and dairy. <span class="ai-cite">&#128196; Page 248, &sect;12.3.1</span></p>
+      <p><strong>3. Contact Emergency Maintenance</strong> — Call Arctic Commercial Services at (555) 234-7890 (24/7). Reference account #FR-4421. <span class="ai-cite">&#128196; Page 249, Emergency Contacts</span></p>
+      <p><strong>4. Document & Report</strong> — Log the incident in the Daily Manager Report. Take photos of temperature readings. Notify District Manager within 2 hours. <span class="ai-cite">&#128196; Page 250, &sect;12.4</span></p>`,
+    sources: [
+      { num: '1', text: 'Store-Operations-Manual-2026.pdf — Chapter 12: Equipment Emergencies' },
+      { num: '2', text: 'Emergency Contact Directory — Updated March 2026' }
+    ],
+    stats: { pages: '412', questions: '0', time: '<3s' }
+  },
+  finance: {
+    name: 'Financial Services',
+    short: 'Finance',
+    useCases: [
+      { id: 'regulatory', title: 'Regulatory research', desc: 'Search regulations and cross-reference with internal policies' },
+      { id: 'audit', title: 'Audit preparation', desc: 'Build audit-ready answers with traceable documentation' },
+      { id: 'gap', title: 'Policy gap analysis', desc: 'Flag policies that don\'t meet new requirements' }
+    ],
+    sampleFiles: [
+      { name: 'AML-Compliance-Framework-Q4-2025.pdf', size: '3.1 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'KYC-Policy-Corporate.pdf', size: '1.8 MB', type: 'PDF', icon: '&#128196;' },
+      { name: 'Transaction-Monitoring-SOP.pdf', size: '2.2 MB', type: 'PDF', icon: '&#128196;' }
+    ],
+    quickPrompt: 'Try: "Which policies reference the updated AML guidelines?"',
+    queries: [
+      'Which internal policies reference the updated AML guidelines?',
+      'Show me all requirements for customer due diligence',
+      'What changed between the Q3 and Q4 regulatory frameworks?'
+    ],
+    answer: `<p>I found <strong>23 internal policies</strong> that reference the AML guidelines. Here's the breakdown:</p>
+      <p><strong>Up to date (16 policies)</strong> — These correctly reference the Q4 2025 framework, including updated Customer Due Diligence requirements in Section 5.2. <span class="ai-cite">&#128196; Framework &sect;5.2</span></p>
+      <p><strong>Needs update (7 policies)</strong> — These still reference Q2 2025. Key gaps:</p>
+      <p>&bull; <em>KYC-Policy-Corporate.pdf</em> — Missing enhanced due diligence for PEPs (Section 5.4.3) <span class="ai-cite">&#128196; &sect;5.4.3</span></p>
+      <p>&bull; <em>Transaction-Monitoring-SOP.pdf</em> — Threshold amounts not updated ($5K &rarr; $3K per new guidelines) <span class="ai-cite">&#128196; &sect;7.1</span></p>
+      <p>&bull; <em>SAR-Filing-Procedures.pdf</em> — Missing new 24-hour filing requirement for suspicious activity &gt;$10K <span class="ai-cite">&#128196; &sect;8.2</span></p>`,
+    sources: [
+      { num: '1', text: 'AML-Compliance-Framework-Q4-2025.pdf — Sections 5.2, 5.4.3, 7.1, 8.2' },
+      { num: '2', text: 'Internal Policy Index — 23 policies cross-referenced' }
+    ],
+    stats: { pages: '186', questions: '0', time: '<2s' }
+  }
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentPersona = null;
+let onboardingStep = 1;
+let selectedUseCase = null;
+
+// ═══════════════════════════════════════════
+// WELCOME → ONBOARDING
+// ═══════════════════════════════════════════
+function selectPersona(key) {
+  currentPersona = key;
+  const p = personas[key];
+
+  // Populate onboarding use cases
+  const ucHtml = p.useCases.map(uc => `
+    <div class="uc-option" onclick="pickUseCase(this, '${uc.id}')">
+      <div class="uc-radio"></div>
+      <div class="uc-text">
+        <h4>${uc.title}</h4>
+        <p>${uc.desc}</p>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('obUseCases').innerHTML = ucHtml;
+
+  // Upload labels
+  document.getElementById('obUploadTitle').textContent = `Upload your first ${p.short.toLowerCase()} document`;
+  document.getElementById('obUploadSub').textContent = `We'll index it and make it searchable in seconds.`;
+
+  // Show onboarding
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('onboardingOverlay').classList.remove('hidden');
+}
+
+function pickUseCase(el, id) {
+  document.querySelectorAll('.uc-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedUseCase = id;
+  document.getElementById('obBtn1').disabled = false;
+}
+
+function simulateUpload() {
+  if (!currentPersona) return;
+  const p = personas[currentPersona];
+  const f = p.sampleFiles[0];
+
+  document.getElementById('obFilePreview').classList.add('visible');
+  document.getElementById('obFileName').textContent = f.name;
+  document.getElementById('obFileSize').textContent = f.size;
+  document.getElementById('obBtn2').disabled = false;
+}
+
+function obNext(step) {
+  // Hide all steps
+  document.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('obStep' + step).classList.add('active');
+  document.getElementById('obProgressFill').style.width = (step / 3 * 100) + '%';
+  onboardingStep = step;
+
+  // Processing animation
+  if (step === 3) {
+    runProcessing();
+  }
+}
+
+function runProcessing() {
+  const items = ['p1', 'p2', 'p3', 'p4'];
+  let i = 0;
+
+  items.forEach(id => {
+    document.getElementById(id).classList.remove('active', 'done');
+  });
+  document.getElementById(items[0]).classList.add('active');
+
+  const interval = setInterval(() => {
+    if (i < items.length) {
+      document.getElementById(items[i]).classList.remove('active');
+      document.getElementById(items[i]).classList.add('done');
+      i++;
+      if (i < items.length) {
+        document.getElementById(items[i]).classList.add('active');
+      }
+    } else {
+      clearInterval(interval);
+      setTimeout(() => enterApp(), 500);
+    }
+  }, 900);
+}
+
+// ═══════════════════════════════════════════
+// ENTER APP
+// ═══════════════════════════════════════════
+function enterApp() {
+  const p = personas[currentPersona];
+
+  // Hide onboarding
+  document.getElementById('onboardingOverlay').classList.add('hidden');
+
+  // Show app shell
+  document.getElementById('appShell').classList.add('active');
+
+  // Populate topbar
+  document.getElementById('topbarPersona').textContent = p.name;
+
+  // Populate dashboard
+  document.getElementById('mPages').textContent = p.stats.pages;
+  document.getElementById('dashQuickPrompt').textContent = p.quickPrompt;
+
+  // Populate recent docs
+  const docsHtml = p.sampleFiles.map(f => `
+    <div class="doc-row">
+      <div class="doc-icon">${f.icon}</div>
+      <div class="doc-info">
+        <div class="doc-name">${f.name}</div>
+        <div class="doc-meta">${f.type} &middot; ${f.size}</div>
+      </div>
+      <div class="doc-status">&#10003; Ready</div>
+    </div>
+  `).join('');
+  document.getElementById('dashDocList').innerHTML = docsHtml;
+
+  // Populate docs table
+  const tableHtml = p.sampleFiles.map(f => `
+    <div class="docs-table-row">
+      <div class="doc-name-cell">
+        <div class="doc-icon">${f.icon}</div>
+        <span>${f.name}</span>
+      </div>
+      <div>${f.type}</div>
+      <div>${f.size}</div>
+      <div><span class="doc-status-badge ready">Ready</span></div>
+    </div>
+  `).join('');
+  document.getElementById('docsTableBody').innerHTML = tableHtml;
+
+  // Populate search
+  const pillsHtml = p.queries.map(q =>
+    `<span class="example-pill" onclick="useQuery(this)">${q}</span>`
+  ).join('');
+  document.getElementById('searchPills').innerHTML = pillsHtml;
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const viewId = 'view' + name.charAt(0).toUpperCase() + name.slice(1);
+  const el = document.getElementById(viewId);
+  if (el) el.classList.add('active');
+
+  document.querySelectorAll(`.nav-item[data-view="${name}"]`).forEach(n => n.classList.add('active'));
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════
+function useQuery(el) {
+  document.getElementById('searchInput').value = el.textContent;
+  doSearch();
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q || !currentPersona) return;
+
+  const p = personas[currentPersona];
+
+  // Show answer
+  document.getElementById('aiAnswerBody').innerHTML = p.answer;
+
+  const sourcesHtml = p.sources.map(s =>
+    `<div class="ai-source-item"><div class="ai-source-num">${s.num}</div>${s.text}</div>`
+  ).join('');
+  document.getElementById('aiSources').innerHTML =
+    `<div class="ai-sources-label">Sources</div>${sourcesHtml}`;
+
+  document.getElementById('aiAnswer').classList.add('visible');
+  document.getElementById('followUp').classList.add('visible');
+
+  // Update metrics
+  const qEl = document.getElementById('mQuestions');
+  qEl.textContent = parseInt(qEl.textContent) + 1;
+
+  // Scroll to answer
+  document.getElementById('aiAnswer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>
