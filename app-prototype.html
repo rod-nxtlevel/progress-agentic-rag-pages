@@ -1088,6 +1088,488 @@
       background: var(--teal);
       animation: pulse 2s ease infinite;
     }
+
+    /* ═══════════════════════════════════════════
+       SIGN-UP SCREEN
+       ═══════════════════════════════════════════ */
+    .signup-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0f1119 0%, #1a1d3a 50%, #0f1119 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+    }
+
+    .signup-screen.hidden { display: none; }
+
+    .signup-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .signup-header {
+      background: linear-gradient(135deg, rgba(129,116,242,0.08), rgba(0,213,199,0.06));
+      padding: 2rem 2rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .signup-header .welcome-logo {
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .signup-header h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+    }
+
+    .signup-persona-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--purple);
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-border);
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      margin-top: 0.5rem;
+    }
+
+    .signup-form {
+      padding: 1.75rem 2rem 2rem;
+    }
+
+    .signup-field {
+      margin-bottom: 1rem;
+    }
+
+    .signup-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.35rem;
+    }
+
+    .signup-field input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      color: var(--text);
+      transition: all 0.15s;
+      outline: none;
+    }
+
+    .signup-field input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(129,116,242,0.1);
+    }
+
+    .btn-signup {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-signup:hover { background: #7164e0; }
+
+    .signup-footer {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    .signup-footer a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════
+       TALK TO EXPERT BUTTON (SIDEBAR)
+       ═══════════════════════════════════════════ */
+    .nav-item-expert {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #fff;
+      background: linear-gradient(135deg, var(--purple), #6c5ce7);
+      margin: 0.75rem 0.75rem 0;
+    }
+
+    .nav-item-expert:hover {
+      background: linear-gradient(135deg, #7164e0, #5e4ed6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(129,116,242,0.3);
+    }
+
+    .nav-item-expert svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .topbar-expert-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      background: var(--purple);
+      color: white;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .topbar-expert-btn:hover { background: #7164e0; }
+    .topbar-expert-btn svg { width: 14px; height: 14px; }
+
+    /* ═══════════════════════════════════════════
+       BOOKING MODAL (CALENDLY STYLE)
+       ═══════════════════════════════════════════ */
+    .booking-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .booking-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .booking-modal {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .booking-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .booking-close:hover { background: var(--border); }
+    .booking-close svg { width: 16px; height: 16px; color: var(--text-secondary); }
+
+    .booking-header {
+      position: relative;
+      padding: 2rem 2rem 1.25rem;
+      background: linear-gradient(135deg, rgba(129,116,242,0.06), rgba(0,213,199,0.04));
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .booking-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .booking-header p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .booking-expert {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+    }
+
+    .booking-expert-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--teal));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .booking-expert-info { flex: 1; }
+    .booking-expert-name { font-size: 0.82rem; font-weight: 600; }
+    .booking-expert-role { font-size: 0.7rem; color: var(--text-tertiary); }
+    .booking-expert-dur {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+      background: rgba(0,213,199,0.1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    .booking-body {
+      padding: 1.5rem 2rem 2rem;
+    }
+
+    .booking-step-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+    }
+
+    .booking-week {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-day {
+      text-align: center;
+      padding: 0.6rem 0.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .booking-day:hover {
+      border-color: var(--purple);
+      background: var(--purple-bg);
+    }
+
+    .booking-day.selected {
+      border-color: var(--purple);
+      background: var(--purple);
+      color: white;
+    }
+
+    .booking-day-name {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.15rem;
+    }
+
+    .booking-day.selected .booking-day-name { color: rgba(255,255,255,0.7); }
+
+    .booking-day-num {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .booking-times {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+      min-height: 0;
+      transition: all 0.2s;
+    }
+
+    .booking-times.hidden-times { display: none; }
+
+    .booking-time {
+      text-align: center;
+      padding: 0.5rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .booking-time:hover {
+      border-color: var(--teal);
+      background: rgba(0,213,199,0.06);
+    }
+
+    .booking-time.selected {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: white;
+    }
+
+    .booking-select-prompt {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+
+    .booking-confirm {
+      margin-top: 0.5rem;
+    }
+
+    .booking-confirm .signup-field { margin-bottom: 0.75rem; }
+
+    .btn-book {
+      width: 100%;
+      padding: 0.65rem;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-book:hover { background: var(--teal-dark); }
+    .btn-book:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Booking success */
+    .booking-success {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 2rem;
+    }
+
+    .booking-success.visible { display: block; }
+
+    .booking-success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), #00e8a0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 1.8rem;
+    }
+
+    .booking-success h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .booking-success p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .booking-success-details {
+      margin: 1.25rem auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      max-width: 320px;
+      text-align: left;
+    }
+
+    .booking-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.3rem 0;
+      font-size: 0.8rem;
+    }
+
+    .booking-detail-row span:first-child {
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .booking-detail-row span:last-child {
+      font-weight: 600;
+    }
+
+    .btn-back-to-app {
+      margin-top: 1rem;
+      padding: 0.5rem 1.5rem;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+
+    .btn-back-to-app:hover { background: #7164e0; }
+
+    @media (max-width: 768px) {
+      .signup-card { max-width: 100%; }
+      .signup-form { padding: 1.25rem 1.5rem 1.5rem; }
+      .signup-header { padding: 1.5rem 1.5rem 1.25rem; }
+      .booking-modal { max-width: 100%; }
+      .booking-body { padding: 1.25rem 1.5rem 1.5rem; }
+      .booking-header { padding: 1.5rem 1.5rem 1rem; }
+      .booking-week { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; }
+      .booking-times { grid-template-columns: repeat(3, 1fr); }
+      .topbar-expert-btn span.desk-label { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1127,6 +1609,52 @@
         <div class="persona-icon finance">&#127974;</div>
         <h3>Financial Services</h3>
         <p>Regulatory filings, compliance policies &amp; audit documentation</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SIGN-UP SCREEN
+     ═══════════════════════════════════════════ -->
+<div class="signup-screen hidden" id="signupScreen">
+  <div class="signup-card">
+    <div class="signup-header">
+      <div class="welcome-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="url(#sug)"/>
+          <defs><linearGradient id="sug" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#8174f2"/><stop offset="1" stop-color="#00d5c7"/></linearGradient></defs>
+          <text x="8" y="23" font-family="Inter,sans-serif" font-weight="700" font-size="18" fill="#fff">P</text>
+        </svg>
+        <div class="welcome-logo-text">Agentic RAG <span>by Progress</span></div>
+      </div>
+      <h2>Start your free trial</h2>
+      <div class="signup-persona-label" id="signupPersonaLabel">Setting up for your industry</div>
+    </div>
+    <div class="signup-form">
+      <div class="signup-field">
+        <label for="suName">Full Name</label>
+        <input type="text" id="suName" placeholder="Jane Smith" value="Jane Smith">
+      </div>
+      <div class="signup-field">
+        <label for="suEmail">Work Email</label>
+        <input type="email" id="suEmail" placeholder="jane@company.com" value="jane@acmefirm.com">
+      </div>
+      <div class="signup-field">
+        <label for="suCompany">Company Name</label>
+        <input type="text" id="suCompany" placeholder="Acme Corp" value="Acme Corp">
+      </div>
+      <div class="signup-field">
+        <label for="suTitle">Job Title</label>
+        <input type="text" id="suTitle" placeholder="Director of Operations" value="Director of Operations">
+      </div>
+      <div class="signup-field">
+        <label for="suPass">Password</label>
+        <input type="password" id="suPass" placeholder="8+ characters" value="prototype123">
+      </div>
+      <button class="btn-signup" onclick="submitSignup()">Create Free Account</button>
+      <div class="signup-footer">
+        Already have an account? <a href="#" onclick="return false;">Sign in</a>
       </div>
     </div>
   </div>
@@ -1238,6 +1766,10 @@
         Integrations
       </div>
     </nav>
+    <div class="nav-item-expert" onclick="openBooking()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Talk to an Expert
+    </div>
     <div class="sidebar-trial">
       <div class="trial-bar"><div class="trial-fill"></div></div>
       <div class="trial-text"><strong>Free Trial</strong> &middot; 15 days left</div>
@@ -1254,6 +1786,10 @@
         <span id="topbarLabel"><strong>Knowledge Hub</strong> &middot; <span id="topbarPersona"></span></span>
       </div>
       <div class="topbar-right">
+        <div class="topbar-expert-btn" onclick="openBooking()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span class="desk-label">Talk to an Expert</span>
+        </div>
         <div class="topbar-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
@@ -1353,6 +1889,69 @@
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     BOOKING MODAL (CALENDLY-STYLE)
+     ═══════════════════════════════════════════ -->
+<div class="booking-overlay" id="bookingOverlay" onclick="if(event.target===this)closeBooking()">
+  <div class="booking-modal">
+    <!-- Booking Form -->
+    <div id="bookingForm">
+      <div class="booking-header">
+        <div class="booking-close" onclick="closeBooking()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <h2>Talk to a Solutions Expert</h2>
+        <p>Book a 30-minute call with our team. No commitment, no pressure.</p>
+        <div class="booking-expert">
+          <div class="booking-expert-avatar">MR</div>
+          <div class="booking-expert-info">
+            <div class="booking-expert-name">Michael Reynolds</div>
+            <div class="booking-expert-role">Senior Solutions Consultant &middot; Progress</div>
+          </div>
+          <div class="booking-expert-dur">30 min</div>
+        </div>
+      </div>
+      <div class="booking-body">
+        <div class="booking-step-label">Select a day</div>
+        <div class="booking-week" id="bookingWeek"></div>
+        <div id="bookingTimesWrap">
+          <div class="booking-select-prompt" id="bookingPrompt">Pick a day above to see available times</div>
+          <div class="booking-times hidden-times" id="bookingTimes"></div>
+        </div>
+        <div class="booking-confirm" id="bookingConfirm" style="display:none;">
+          <div class="booking-step-label">Confirm your details</div>
+          <div class="signup-field">
+            <label>Name</label>
+            <input type="text" id="bkName" value="Jane Smith">
+          </div>
+          <div class="signup-field">
+            <label>Email</label>
+            <input type="email" id="bkEmail" value="jane@acmefirm.com">
+          </div>
+          <div class="signup-field">
+            <label>What would you like to discuss?</label>
+            <input type="text" id="bkTopic" placeholder="e.g., Implementation timeline, pricing, integrations">
+          </div>
+          <button class="btn-book" onclick="confirmBooking()">Confirm Booking</button>
+        </div>
+      </div>
+    </div>
+    <!-- Booking Success -->
+    <div class="booking-success" id="bookingSuccess">
+      <div class="booking-success-icon">&#10003;</div>
+      <h2>You're booked!</h2>
+      <p>A calendar invite has been sent to your email.<br>Michael will reach out to confirm.</p>
+      <div class="booking-success-details">
+        <div class="booking-detail-row"><span>Date</span><span id="bkSuccessDate">—</span></div>
+        <div class="booking-detail-row"><span>Time</span><span id="bkSuccessTime">—</span></div>
+        <div class="booking-detail-row"><span>Duration</span><span>30 minutes</span></div>
+        <div class="booking-detail-row"><span>With</span><span>Michael Reynolds</span></div>
+      </div>
+      <button class="btn-back-to-app" onclick="closeBooking()">Back to App</button>
     </div>
   </div>
 </div>
@@ -1496,13 +2095,55 @@ const personas = {
 let currentPersona = null;
 let onboardingStep = 1;
 let selectedUseCase = null;
+let selectedDay = null;
+let selectedTime = null;
 
 // ═══════════════════════════════════════════
-// WELCOME → ONBOARDING
+// URL PARAM DETECTION
 // ═══════════════════════════════════════════
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const persona = params.get('persona');
+  if (persona && personas[persona]) {
+    // Skip welcome, go straight to sign-up
+    document.addEventListener('DOMContentLoaded', () => selectPersona(persona));
+  }
+})();
+
+// ═══════════════════════════════════════════
+// WELCOME → SIGN-UP → ONBOARDING
+// ═══════════════════════════════════════════
+const personaLabels = {
+  associations: 'Professional Associations',
+  legal: 'Law Firms & Legal Ops',
+  retail: 'Retail & Franchise',
+  finance: 'Financial Services & Insurance'
+};
+
 function selectPersona(key) {
   currentPersona = key;
   const p = personas[key];
+
+  // Populate sign-up persona label
+  document.getElementById('signupPersonaLabel').textContent = personaLabels[key] || p.name;
+
+  // Show sign-up, hide welcome
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('signupScreen').classList.remove('hidden');
+}
+
+function submitSignup() {
+  const p = personas[currentPersona];
+
+  // Capture name/email for booking pre-fill
+  const name = document.getElementById('suName').value;
+  const email = document.getElementById('suEmail').value;
+  document.getElementById('bkName').value = name;
+  document.getElementById('bkEmail').value = email;
+
+  // Update avatar initials
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('topbarAvatar').textContent = initials;
 
   // Populate onboarding use cases
   const ucHtml = p.useCases.map(uc => `
@@ -1520,8 +2161,8 @@ function selectPersona(key) {
   document.getElementById('obUploadTitle').textContent = `Upload your first ${p.short.toLowerCase()} document`;
   document.getElementById('obUploadSub').textContent = `We'll index it and make it searchable in seconds.`;
 
-  // Show onboarding
-  document.getElementById('welcomeScreen').classList.add('hidden');
+  // Show onboarding, hide sign-up
+  document.getElementById('signupScreen').classList.add('hidden');
   document.getElementById('onboardingOverlay').classList.remove('hidden');
 }
 
@@ -1686,6 +2327,90 @@ function doSearch() {
 
   // Scroll to answer
   document.getElementById('aiAnswer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════
+// BOOKING (CALENDLY-STYLE)
+// ═══════════════════════════════════════════
+function openBooking() {
+  // Build week days (next Mon-Fri)
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : (dayOfWeek === 6 ? 2 : (8 - dayOfWeek));
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + daysUntilMonday);
+
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  let weekHtml = '';
+
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(nextMonday);
+    d.setDate(nextMonday.getDate() + i);
+    const dateStr = `${monthNames[d.getMonth()]} ${d.getDate()}`;
+    weekHtml += `<div class="booking-day" onclick="selectDay(this, '${dayNames[i]}', '${dateStr}')" data-date="${dateStr}">
+      <div class="booking-day-name">${dayNames[i]}</div>
+      <div class="booking-day-num">${d.getDate()}</div>
+    </div>`;
+  }
+  document.getElementById('bookingWeek').innerHTML = weekHtml;
+
+  // Reset state
+  selectedDay = null;
+  selectedTime = null;
+  document.getElementById('bookingPrompt').style.display = '';
+  document.getElementById('bookingTimes').classList.add('hidden-times');
+  document.getElementById('bookingConfirm').style.display = 'none';
+  document.getElementById('bookingForm').style.display = '';
+  document.getElementById('bookingSuccess').classList.remove('visible');
+
+  // Show
+  document.getElementById('bookingOverlay').classList.add('visible');
+}
+
+function closeBooking() {
+  document.getElementById('bookingOverlay').classList.remove('visible');
+}
+
+function selectDay(el, dayName, dateStr) {
+  document.querySelectorAll('.booking-day').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDay = `${dayName}, ${dateStr}`;
+
+  // Show time slots
+  const times = ['9:00 AM', '10:00 AM', '11:00 AM', '11:30 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
+  // Randomly remove 2-3 slots to simulate availability
+  const available = times.filter(() => Math.random() > 0.25);
+  const timesHtml = available.map(t =>
+    `<div class="booking-time" onclick="selectTime(this, '${t}')">${t}</div>`
+  ).join('');
+
+  document.getElementById('bookingPrompt').style.display = 'none';
+  const timesEl = document.getElementById('bookingTimes');
+  timesEl.innerHTML = timesHtml;
+  timesEl.classList.remove('hidden-times');
+  document.getElementById('bookingConfirm').style.display = 'none';
+  selectedTime = null;
+}
+
+function selectTime(el, time) {
+  document.querySelectorAll('.booking-time').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTime = time;
+
+  // Show confirmation form
+  document.getElementById('bookingConfirm').style.display = 'block';
+  document.getElementById('bkTopic').focus();
+}
+
+function confirmBooking() {
+  if (!selectedDay || !selectedTime) return;
+
+  // Show success
+  document.getElementById('bkSuccessDate').textContent = selectedDay;
+  document.getElementById('bkSuccessTime').textContent = selectedTime;
+  document.getElementById('bookingForm').style.display = 'none';
+  document.getElementById('bookingSuccess').classList.add('visible');
 }
 </script>
 </body>
