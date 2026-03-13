@@ -12,12 +12,21 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-brand">
-      <span class="logo-mark">P</span>
-      Agentic RAG
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <rect width="24" height="24" rx="6" fill="url(#pg)"/>
+          <defs><linearGradient id="pg" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#8174f2"/><stop offset="1" stop-color="#00d5c7"/></linearGradient></defs>
+          <text x="6" y="17.5" font-family="Inter,sans-serif" font-weight="700" font-size="14" fill="#fff">P</text>
+        </svg>
+        Progress
+      </span>
+      <span class="separator"></span>
+      <span class="product-name">Agentic RAG</span>
     </a>
     <ul class="nav-links">
       <li><a href="#solutions">Solutions</a></li>
-      <li><a href="https://rag.progress.cloud" class="nav-cta">Start Free Trial</a></li>
+      <li><a href="https://www.progress.com/agentic-rag" class="nav-demo">Book a Demo</a></li>
+      <li><a href="https://rag.progress.cloud" class="nav-cta">Try Now</a></li>
     </ul>
   </div>
 </nav>
@@ -33,7 +42,7 @@
     <p class="hero-sub">Agentic RAG transforms your documents, videos, and records into an AI-powered knowledge layer your team can search in seconds — in any language, from any device. No engineering team required.</p>
     <div class="hero-actions">
       <a href="https://rag.progress.cloud" class="btn btn-primary">
-        Start 14-Day Free Trial <span class="btn-arrow">&rarr;</span>
+        Start Free Trial <span class="btn-arrow">&rarr;</span>
       </a>
       <a href="#solutions" class="btn btn-secondary">
         See Industry Solutions <span class="btn-arrow">&darr;</span>
@@ -91,27 +100,31 @@
 </section>
 
 <!-- Trust Strip -->
-<section class="section section-alt" style="padding: 3rem 2rem;">
-  <div class="container" style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; align-items: center;">
-    <div class="cta-badge" style="color: var(--dark-text);">
+<section class="section section-alt" style="padding: 2.5rem 2rem;">
+  <div class="container trust-strip">
+    <div class="trust-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-      SOC 2 Type 2 Certified
+      SOC 2 Type 2
     </div>
-    <div class="cta-badge" style="color: var(--dark-text);">
+    <div class="trust-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-      ISO 27001 Compliant
+      ISO 27001
     </div>
-    <div class="cta-badge" style="color: var(--dark-text);">
+    <div class="trust-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-      GDPR Ready
+      256-bit AES
     </div>
-    <div class="cta-badge" style="color: var(--dark-text);">
+    <div class="trust-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      99.5% SLA
+    </div>
+    <div class="trust-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
       60+ File Formats
     </div>
-    <div class="cta-badge" style="color: var(--dark-text);">
+    <div class="trust-badge">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-      Multilingual Search
+      Multilingual
     </div>
   </div>
 </section>
@@ -121,15 +134,20 @@
   <div class="cta-content">
     <h2>See your own content, searchable in minutes</h2>
     <p>Upload a sample of your document library. Ask it a question. See the answer — with sources. No engineering team required.</p>
-    <a href="https://rag.progress.cloud" class="btn btn-primary">
-      Start 14-Day Free Trial <span class="btn-arrow">&rarr;</span>
-    </a>
+    <div class="hero-actions" style="justify-content: center;">
+      <a href="https://rag.progress.cloud" class="btn btn-primary">
+        Start Free Trial <span class="btn-arrow">&rarr;</span>
+      </a>
+      <a href="https://www.progress.com/agentic-rag" class="btn btn-secondary">
+        Book a Demo <span class="btn-arrow">&rarr;</span>
+      </a>
+    </div>
   </div>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
-  <p>&copy; 2026 Progress Software Corporation. All rights reserved. Agentic RAG is a product of Progress.</p>
+  <p>&copy; 2026 Progress Software Corporation. All rights reserved. Agentic RAG is a product of <a href="https://www.progress.com">Progress</a>.</p>
 </footer>
 
 </body>
